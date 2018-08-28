@@ -14,17 +14,35 @@ const validateReducer = reducer => {
   }
 };
 
+const validateCallback = callback => {
+  if (Object.prototype.toString.call(callback) !== '[object Function]') {
+    throw new Error('Please provide a callback function.');
+  }
+};
+
 export default (reducer, initialState = {}) => {
   validateReducer(reducer);
   let state = initialState;
+  let subscribers = [];
 
   return {
     dispatch(action) {
       validateAction(action);
       state = reducer(state, action);
+      subscribers.forEach(cb => cb(state));
     },
+
     getState() {
       return state;
+    },
+
+    subscribe(callback) {
+      validateCallback(callback);
+      subscribers.push(callback);
+
+      return () => {
+        subscribers = subscribers.filter(s => s !== callback);
+      };
     }
   };
 };

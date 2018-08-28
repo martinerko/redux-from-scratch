@@ -116,4 +116,62 @@ describe('createStore', () => {
       expect(state.c.name).not.toBe('Peter');
     });
   });
+
+  describe('subscribe', () => {
+    let store;
+    const INITIAL_STATE = {
+      value: 100
+    };
+    beforeEach(() => {
+      store = createStore(reducer, INITIAL_STATE);
+    });
+
+    test('should return a function when subscriber is called', () => {
+      expect(typeof store.subscribe(jest.fn())).toBe('function');
+    });
+
+    test('should invoke passed callback with freshly calculated state after dispatch was called', () => {
+      const callback1 = jest.fn();
+      const callback2 = jest.fn();
+      store.subscribe(callback1);
+      store.subscribe(callback2);
+
+      store.dispatch({ type: INCREMENT });
+
+      expect(callback1).toBeCalledWith(
+        expect.objectContaining({
+          value: 101
+        })
+      );
+
+      expect(callback2).toBeCalledWith(
+        expect.objectContaining({
+          value: 101
+        })
+      );
+    });
+
+    test('should not invoke unsubscribed callback', () => {
+      const callback1 = jest.fn();
+      const callback2 = jest.fn();
+      const unsubscribe1 = store.subscribe(callback1);
+      const unsubscribe2 = store.subscribe(callback2);
+
+      unsubscribe1();
+      store.dispatch({ type: INCREMENT });
+      unsubscribe2();
+
+      expect(callback1).not.toBeCalledWith(
+        expect.objectContaining({
+          value: 101
+        })
+      );
+
+      expect(callback2).toBeCalledWith(
+        expect.objectContaining({
+          value: 101
+        })
+      );
+    });
+  });
 });
