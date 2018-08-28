@@ -22,7 +22,7 @@ const validateCallback = callback => {
 
 export default (reducer, initialState = {}) => {
   validateReducer(reducer);
-  let state = initialState;
+  let state = { ...initialState };
   let subscribers = [];
 
   return {
